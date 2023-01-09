@@ -1,0 +1,30 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Validation rules for Azure CDN
+#
+
+#region Rules
+
+---
+# Synopsis: Enforce HTTPS for client connections.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.CDN.HTTP
+  ref: AZR-000093
+  tags:
+    release: 'GA'
+    ruleSet: '2020_06'
+    Azure.WAF/pillar: 'Security'
+  labels:
+    Azure.ASB.v3/control: 'DP-3'
+spec:
+  type:
+  - Microsoft.Cdn/profiles/endpoints
+  condition:
+    field: properties.isHttpAllowed
+    equals: false
+
+#endregion Rules

@@ -1,0 +1,107 @@
+trigger:
+  branches:
+    include:
+      - 
+
+pool: 'ServicesDevOps-Vsogd'
+  
+variables:
+  configuration: release
+  platform: x64
+  azureServiceConnection: 'VSOGD-SP-Azure-Bicep-V2'
+  sourceFolder: 'StandardEnvironments/AzureCloudAI/ENV_CAI_IaCSetupModernisation_Std_001/Code'
+  
+stages:
+- stage: Build
+  displayName:  Build template      
+  jobs:
+  - job: Build
+    steps:
+
+    - task: AzureCLI@2  
+      displayName: 'build bicep artifact' 
+      inputs: 
+        azureSubscription: $(azureServiceConnection)
+        scriptType: 'pscore'  
+        scriptLocation: 'inlineScript'  
+        inlineScript: 'az bicep build --file main.bicep'
+        workingDirectory: $(sourceFolder)
+
+    - task: AzureCLI@2
+      displayName: What-If
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+            az deployment sub what-if `
+            --name $(deploymentName) `
+            --location $(location) `
+            --template-file '$(sourceFolder)/main.bicep' `
+            --parameters '$(sourceFolder)/Parameters/parameters$(environment).json' `
+            --parameters environment=$(environment) prefix=$(prefix) locationShortName=$(locationShortName) location=$(location) subscriptionId=$(subscriptionId) sqlServerSId=$(sqlServerSId) `
+            --only-show-errors
+
+    - task: CopyFiles@2
+      displayName: CopyTemplates
+      inputs:
+        SourceFolder: $(sourceFolder)
+        Contents: '**\*'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact
+      inputs:
+        PathtoPublish: $(Build.ArtifactStagingDirectory)
+        ArtifactName: drop
+
+- stage: Deployment
+  displayName: Deploy Environment
+  dependsOn: Build
+  jobs:
+    - deployment: Deploy
+      displayName: Deploying Environment
+      environment: $(environment)
+      timeoutInMinutes: 120
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            
+            - task: AzureCLI@2
+              displayName: Azure CLI
+              inputs:
+                azureSubscription: $(azureServiceConnection)
+                scriptType: 'pscore'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                    az deployment sub create `
+                    --name $(deploymentName) `
+                    --location $(location) `
+                    --template-file '$(Pipeline.Workspace)/drop/main.bicep' `
+                    --parameters '$(Pipeline.Workspace)/drop/Parameters/parameters$(environment).json' `
+                    --parameters environment=$(environment) prefix=$(prefix) locationShortName=$(locationShortName) location=$(location) subscriptionId=$(subscriptionId) sqlServerSId=$(sqlServerSId) `
+                    --only-show-errors
+
+            - task: AzurePowerShell@5
+              name: executingpester
+              displayName: 'Azure PowerShell script: Inline to execute pester script'
+              inputs:
+                azureSubscription: $(azureServiceConnection)
+                ScriptType: InlineScript
+                Inline: |
+                  $parametersfilePath = "$(Pipeline.Workspace)/drop/Parameters/parameters$($env:environment).json"
+                  $container = New-PesterContainer -Path "$(Pipeline.Workspace)/drop/Tests/pester.Tests.ps1"  -Data @{environment = $env:environment ; locationShortName = $env:locationShortName ; prefix = $env:prefix ; location = $env:location ; parametersfilePath = $parametersfilePath }
+                  Invoke-pester -Container $container -ErrorVariable "fail"
+                  if($fail)
+                  {
+                      Write-Error "Pester is failed."
+                      return
+                  }
+                  
+                azurePowerShellVersion: LatestVersion
+              env:                    
+                environment: $(environment)
+                locationShortName: $(locationShortName)
+                prefix: $(prefix)
+                location: $(location)

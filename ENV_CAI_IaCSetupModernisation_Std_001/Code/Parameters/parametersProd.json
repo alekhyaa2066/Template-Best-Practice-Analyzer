@@ -1,0 +1,143 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment": {
+            "value": "prod"
+        },
+        "prefix": {
+            "value": "iar54"
+        },
+        "locationShortName": {
+            "value": "sea"
+        },
+        "workspaceSkuName": {
+            "value": "Standalone"
+        },
+        "applicationInsightsKind": {
+            "value": "web"
+        },
+        "storageAccountSku": {
+            "value": {
+                "sku": "Standard_LRS",
+                "kind": "StorageV2"
+            }
+        },
+        "virtualNetworkAddressPrefix": {
+            "value": "172.17.0.0/16"
+        },
+        "subnetAddressPrefix": {
+            "value": "172.17.0.0/24"
+        },
+        "keyVaultSubnetAddressPrefix": {
+            "value": "172.17.1.0/24"
+        },
+        "buildAgentIpAddress": {
+            "value": "223.227.35.142/32"
+        },
+        "buildAgentModernPlatformsIpAddress": {
+            "value": "20.75.136.176/29"
+        },
+        "blobContainers": {
+            "value": [
+                "insights-logs-appserviceauditlogs",
+                "insights-logs-auditevent",
+                "insights-metrics-pt1m",
+                "saemaillogicapplogs",
+                "samanuallogicapplogs",
+                "sqldbauditlogs",
+                "vulnerabilityassessment"
+            ]
+        },
+        "sqlLogin": {
+            "value": "ServicesCode Admin"
+        },
+        "sqlServerSId": {
+            "value": "17bb8ee3-9d1d-49df-b756-70adb6df6f78"
+        },
+        "sqlDatabaseSku": {
+            "value": {
+                "name": "Standard",
+                "tier": "Standard",
+                "capacity": 10
+            }
+        },
+        "serviceCodeWebAppName": {
+            "value": "servicescode-as"
+        },
+        "appServicePlanSku": {
+            "value": {
+                "name": "P1v2",
+                "tier": "PremiumV2",
+                "size": "P1v2",
+                "family": "Pv2",
+                "capacity": 1
+            }
+        },
+        "keyVaultSku": {
+            "value": {
+                "family": "A",
+                "name": "premium"
+            }
+        },
+        "apificationPepGroupIds": {
+            "value": [
+                "vault"
+            ]
+        },
+        "apificationPepDnsConfigName": {
+            "value": "privatelink-vaultcore-azure-net"
+        },
+        "storagePepGroupIds": {
+            "value": [
+                "blob"
+            ]
+        },
+        "storagePepDnsConfigName": {
+            "value": "privatelink-blob-core-windows-net"
+        },
+        "sqlServerPepGroupIds": {
+            "value": [
+                "sqlServer"
+            ]
+        },
+        "sqlServerPepDnsConfigName": {
+            "value": "privatelink-database-windows-net"
+        },
+        "organisationAlertLogicAppIp": {
+            "value": [
+                "20.88.152.5",
+                "20.88.152.27",
+                "20.88.152.21",
+                "20.88.152.2"
+            ]
+        },
+        "logicMonitorAppIp": {
+            "value": [
+                "20.88.152.5",
+                "20.88.152.27",
+                "20.88.152.21",
+                "20.88.152.2"
+            ]
+        },
+        "webTestsLocations": {
+            "value": [
+                {
+                    "Id": "us-tx-sn1-azr"
+                },
+                {
+                    "Id": "us-il-ch1-azr"
+                },
+                {
+                    "Id": "apac-jp-kaw-edge"
+                },
+                {
+                    "Id": "us-va-ash-azr"
+                },
+                {
+                    "Id": "emea-au-syd-edge"
+                }
+            ]
+        }
+    }
+}

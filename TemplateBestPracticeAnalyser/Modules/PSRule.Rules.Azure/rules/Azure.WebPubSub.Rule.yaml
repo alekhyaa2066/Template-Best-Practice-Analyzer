@@ -1,0 +1,49 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Rules for Web PubSub Service
+#
+
+#region Rules
+
+---
+# Synopsis: Configure Web PubSub Services to use managed identities to access Azure resources securely.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.WebPubSub.ManagedIdentity
+  ref: AZR-000277
+  tags:
+    release: GA
+    ruleSet: 2022_03
+    Azure.WAF/pillar: 'Security'
+  labels:
+    Azure.ASB.v3/control: [ 'IM-1', 'IM-3' ]
+spec:
+  type:
+  - Microsoft.SignalRService/webPubSub
+  condition:
+    field: Identity.Type
+    in:
+    - 'SystemAssigned'
+    - 'UserAssigned'
+
+---
+# Synopsis: Use SKUs that includes a SLA when configuring a Web PubSub Service.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.WebPubSub.SLA
+  ref: AZR-000278
+  tags:
+    release: GA
+    ruleSet: 2022_03
+spec:
+  type:
+  - Microsoft.SignalRService/webPubSub
+  condition:
+    field: sku.name
+    notEquals: Free_F1
+
+#endregion Rules

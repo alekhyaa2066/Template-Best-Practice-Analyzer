@@ -1,0 +1,95 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Rules for Firewalls
+#
+
+#region Rules
+
+---
+# Synopsis: Firewall names should meet naming requirements.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Firewall.Name
+  ref: AZR-000103
+  tags:
+    release: 'GA'
+    ruleSet: '2021_12'
+spec:
+  type:
+  - Microsoft.Network/azureFirewalls
+  condition:
+    allOf:
+    - name: '.'
+      greaterOrEquals: 1
+    - name: '.'
+      lessOrEquals: 80
+    - name: '.'
+      match: '^[a-z0-9]([a-z0-9_.-]{0,78}[a-z0-9_])?$'
+
+---
+# Synopsis: Firewall policy names should meet naming requirements.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Firewall.PolicyName
+  ref: AZR-000104
+  tags:
+    release: 'GA'
+    ruleSet: '2021_12'
+spec:
+  type:
+  - Microsoft.Network/firewallPolicies
+  condition:
+    allOf:
+    - name: '.'
+      greaterOrEquals: 1
+    - name: '.'
+      lessOrEquals: 80
+    - name: '.'
+      match: '^[a-z0-9]([a-z0-9_.-]{0,78}[a-z0-9_])?$'
+
+---
+# Synopsis: Deny high confidence malicious IP addresses and domains.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Firewall.Mode
+  ref: AZR-000105
+  tags:
+    release: 'GA'
+    ruleSet: '2020_06'
+spec:
+  type:
+  - Microsoft.Network/azureFirewalls
+  with:
+  - Azure.Firewall.IsClassicManaged
+  condition:
+    field: Properties.threatIntelMode
+    equals: Deny
+
+    # Ignore if there is a firewall policy attached (properties.firewallPolicy.id not empty) or if properties.sku.name = AZFW_Hub
+
+#endregion Rules
+
+#region Selectors
+
+---
+# Synopsis: Azure Firewall is using classic management mode.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Selector
+metadata:
+  name: Azure.Firewall.IsClassicManaged
+spec:
+  if:
+    allOf:
+    - type: '.'
+      equals: Microsoft.Network/azureFirewalls
+    - field: properties.firewallPolicy.id
+      exists: false
+    - field: properties.sku.name
+      notEquals: AZFW_Hub
+
+#endregion Selectors

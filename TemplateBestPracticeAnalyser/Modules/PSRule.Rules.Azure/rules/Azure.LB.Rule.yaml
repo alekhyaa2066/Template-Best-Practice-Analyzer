@@ -1,0 +1,32 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Rules for Load Balancers
+#
+
+#region Rules
+
+---
+# Synopsis: Application Security Group (ASG) names should meet naming requirements.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.LB.Name
+  ref: AZR-000129
+  tags:
+    release: 'GA'
+    ruleSet: '2020_06'
+spec:
+  type:
+  - Microsoft.Network/loadBalancers
+  condition:
+    allOf:
+    - name: '.'
+      greaterOrEquals: 1
+    - name: '.'
+      lessOrEquals: 80
+    - name: '.'
+      match: '^[a-z0-9]([a-z0-9_.-]{0,78}[a-z0-9_])?$'
+
+#endregion Rules

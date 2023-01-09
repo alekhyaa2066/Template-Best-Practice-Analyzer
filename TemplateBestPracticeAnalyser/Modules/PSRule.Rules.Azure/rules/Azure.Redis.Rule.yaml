@@ -1,0 +1,94 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Rules for Redis Cache
+#
+
+#region Rules
+
+---
+# Synopsis: Redis Cache should only accept secure connections.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Redis.NonSslPort
+  ref: AZR-000163
+  tags:
+    release: GA
+    ruleSet: 2020_06
+    Azure.WAF/pillar: 'Security'
+  labels:
+    Azure.ASB.v3/control: 'NS-2'
+spec:
+  type:
+  - 'Microsoft.Cache/Redis'
+  condition:
+    field: properties.enableNonSslPort
+    equals: false
+
+---
+# Synopsis: Redis Cache should reject TLS versions older than 1.2.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Redis.MinTLS
+  ref: AZR-000164
+  tags:
+    release: GA
+    ruleSet: 2020_06
+    Azure.WAF/pillar: 'Security'
+  labels:
+    Azure.ASB.v3/control: 'DP-3'
+spec:
+  type:
+  - 'Microsoft.Cache/Redis'
+  condition:
+    field: properties.minimumTlsVersion
+    version: '>=1.2'
+
+---
+# Synopsis: Redis cache should disable public network access.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Rule
+metadata:
+  name: Azure.Redis.PublicNetworkAccess
+  ref: AZR-000165
+  tags:
+    release: GA
+    ruleSet: 2022_03
+    Azure.WAF/pillar: 'Security'
+  labels:
+    Azure.ASB.v3/control: 'NS-2'
+spec:
+  type:
+  - 'Microsoft.Cache/Redis'
+  condition:
+    field: properties.publicNetworkAccess
+    equals: Disabled
+
+#endregion Rules
+
+#region Selectors
+
+---
+# Synopsis: Azure Cache for Redis with a SKU set.
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Selector
+metadata:
+  name: Azure.Redis.HasSku
+  annotations:
+    export: false
+spec:
+  if:
+    allOf:
+    - type: '.'
+      equals: Microsoft.Cache/Redis
+    - field: properties.sku.capacity
+      exists: true
+    - field: properties.sku.family
+      exists: true
+    - field: properties.sku.name
+      exists: true
+
+#endregion Selectors
